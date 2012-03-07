@@ -121,6 +121,7 @@ def home(request):
                         request.session['rosetta_last_save_error'] = True
 
             if file_change and rosetta_i18n_write:
+
                 try:
                     # Provide defaults in case authorization is not required.
                     request.user.first_name = getattr(request.user, 'first_name', 'Anonymous')
@@ -134,7 +135,9 @@ def home(request):
                     pass
                 try:
                     rosetta_i18n_pofile.save()
-                    rosetta_i18n_pofile.save_as_mofile(rosetta_i18n_fn.replace('.po', '.mo'))
+                    po_filepath, ext = os.path.splitext(rosetta_i18n_fn)
+                    save_as_mo_filepath = po_filepath + '.mo'
+                    rosetta_i18n_pofile.save_as_mofile(save_as_mo_filepath)
 
                     post_save.send(sender=None, language_code=rosetta_i18n_lang_code, request=request)
                     # Try auto-reloading via the WSGI daemon mode reload mechanism
@@ -173,6 +176,7 @@ def home(request):
                         query_arg = '?'
                     query_arg = query_arg + 'page=%d' % int(request.GET.get('page'))
                 return HttpResponseRedirect(reverse('rosetta-home') + iri_to_uri(query_arg))
+
         rosetta_i18n_lang_name = _(request.session.get('rosetta_i18n_lang_name'))
         rosetta_i18n_lang_code = request.session.get('rosetta_i18n_lang_code')
 
